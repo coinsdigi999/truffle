@@ -1,0 +1,42 @@
+npm install -g truffle
+mkdir mmc-project
+cd mmc-project
+truffle init
+const MMC = artifacts.require("MMC");
+
+module.exports = function (deployer) {
+  deployer.deploy(MMC);
+};// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract MMC is ERC20 {
+    bool public hasMinted = false;
+    address public owner;
+
+    constructor() ERC20("Magic Money Computer", "MMC") {
+        owner = msg.sender;
+    }
+
+    function mintToOwner() public {
+        require(!hasMinted, "Already minted");
+        require(msg.sender == owner, "Only owner can mint");
+        uint256 amount = 10000 * 10**18;
+        _mint(owner, amount);
+        hasMinted = true;
+    }
+}
+       
+const MMC = artifacts.require("MMC");
+
+contract("MMC", accounts => {
+    it("should mint MMCs for owner", async () => {
+        const mmc = await MMC.deployed();
+        await mmc.mintToOwner({from: accounts[0]});
+        
+        const balance = await mmc.balanceOf(accounts[0]);
+        assert.equal(balance.toString(), (10000 * 10**18).toString(), "Incorrect MMC balance after mint");
+    });
+});                                                                                                                                                        truffle compile
+truffle test
